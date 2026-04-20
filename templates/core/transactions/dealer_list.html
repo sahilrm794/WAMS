@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}Sales Invoices{% endblock %}
+{% block page_title %}Sales Invoices{% endblock %}
+{% block content %}
+<div class="page-toolbar">
+  <form class="search-form" method="get">
+    <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Search…">
+    <select name="status" class="form-select">
+      <option value="">All Payment Status</option>
+      <option value="pending" {% if status == 'pending' %}selected{% endif %}>Pending</option>
+      <option value="paid" {% if status == 'paid' %}selected{% endif %}>Paid</option>
+      <option value="overdue" {% if status == 'overdue' %}selected{% endif %}>Overdue</option>
+    </select>
+    <button class="btn btn-outline-secondary">Filter</button>
+    {% if q or status %}<a href="{% url 'dealer_transaction_list' %}" class="btn btn-outline-secondary">Clear</a>{% endif %}
+  </form>
+  {% if user.role == 'admin' %}
+  <a href="{% url 'dealer_transaction_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> New Invoice</a>
+  {% endif %}
+</div>
+
+<div class="card">
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr><th>Invoice No.</th><th>Dealer</th><th>Date</th><th>Amount</th><th>Payment</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+      {% for t in page_obj %}
+      <tr>
+        <td><a href="{% url 'dealer_transaction_detail' t.pk %}">{{ t.invoice_number }}</a></td>
+        <td>{{ t.dealer.company_name }}</td>
+        <td>{{ t.transaction_date }}</td>
+        <td>₹{{ t.total_amount|floatformat:2 }}</td>
+        <td><span class="badge-status badge-{{ t.payment_status }}">{{ t.get_payment_status_display }}</span></td>
+        <td><a href="{% url 'dealer_transaction_detail' t.pk %}" class="btn btn-xs btn-outline-primary">View</a></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" class="text-center text-muted py-4">No invoices found.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% include 'core/pagination.html' %}
+{% endblock %}

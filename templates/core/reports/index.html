@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% block title %}Reports{% endblock %}
+{% block page_title %}Reports{% endblock %}
+{% block content %}
+
+<!-- Date filter -->
+<div class="card mb-4">
+  <div class="card-body">
+    <form method="get" class="row g-2 align-items-end">
+      <div class="col-md-3">
+        <label class="form-label">From</label>
+        <input type="date" name="date_from" value="{{ date_from }}" class="form-control">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">To</label>
+        <input type="date" name="date_to" value="{{ date_to }}" class="form-control">
+      </div>
+      <div class="col-md-2">
+        <button type="submit" class="btn btn-primary w-100">Apply</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Summary cards -->
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-icon bg-success-light"><i class="bi bi-receipt text-success"></i></div>
+      <div>
+        <div class="stat-value">₹{{ total_sales|floatformat:0 }}</div>
+        <div class="stat-label">Total Sales ({{ sales_count }} invoices)</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-icon bg-danger-light"><i class="bi bi-cart3 text-danger"></i></div>
+      <div>
+        <div class="stat-value">₹{{ total_purchases|floatformat:0 }}</div>
+        <div class="stat-label">Total Purchases ({{ purchases_count }} POs)</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card {% if low_products.count > 0 %}border-warning{% endif %}">
+      <div class="stat-icon bg-warning-light"><i class="bi bi-box-seam text-warning"></i></div>
+      <div>
+        <div class="stat-value">{{ low_products.count }}</div>
+        <div class="stat-label">Low Stock Products</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card {% if low_parts.count > 0 %}border-warning{% endif %}">
+      <div class="stat-icon bg-warning-light"><i class="bi bi-tools text-warning"></i></div>
+      <div>
+        <div class="stat-value">{{ low_parts.count }}</div>
+        <div class="stat-label">Low Stock Parts</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <!-- Sales by Dealer -->
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header">Sales by Dealer</div>
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead><tr><th>Dealer</th><th class="text-end">Invoices</th><th class="text-end">Total (₹)</th></tr></thead>
+          <tbody>
+          {% for row in sales_by_dealer %}
+          <tr>
+            <td>{{ row.dealer__company_name }}</td>
+            <td class="text-end">{{ row.count }}</td>
+            <td class="text-end">{{ row.total|floatformat:2 }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="3" class="text-center text-muted py-3">No data</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Purchases by Supplier -->
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header">Purchases by Supplier</div>
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead><tr><th>Supplier</th><th class="text-end">POs</th><th class="text-end">Total (₹)</th></tr></thead>
+          <tbody>
+          {% for row in purchases_by_supplier %}
+          <tr>
+            <td>{{ row.supplier__company_name }}</td>
+            <td class="text-end">{{ row.count }}</td>
+            <td class="text-end">{{ row.total|floatformat:2 }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="3" class="text-center text-muted py-3">No data</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <!-- Top Products -->
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header">Top 10 Products by Revenue</div>
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead><tr><th>Product</th><th class="text-end">Qty Sold</th><th class="text-end">Revenue (₹)</th></tr></thead>
+          <tbody>
+          {% for row in top_products %}
+          <tr>
+            <td>{{ row.product__name }}</td>
+            <td class="text-end">{{ row.qty }}</td>
+            <td class="text-end">{{ row.revenue|floatformat:2 }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="3" class="text-center text-muted py-3">No data</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Parts -->
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header">Top 10 Parts by Spend</div>
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead><tr><th>Part</th><th class="text-end">Qty Purchased</th><th class="text-end">Cost (₹)</th></tr></thead>
+          <tbody>
+          {% for row in top_parts %}
+          <tr>
+            <td>{{ row.part__name }}</td>
+            <td class="text-end">{{ row.qty }}</td>
+            <td class="text-end">{{ row.cost|floatformat:2 }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="3" class="text-center text-muted py-3">No data</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if low_products %}
+<div class="card mb-3">
+  <div class="card-header text-warning"><i class="bi bi-exclamation-triangle"></i> Low Stock Products</div>
+  <div class="card-body p-0">
+    <table class="table mb-0">
+      <thead><tr><th>Product</th><th>Category</th><th class="text-end">Stock</th><th class="text-end">Reorder At</th></tr></thead>
+      <tbody>
+      {% for p in low_products %}
+      <tr class="table-warning">
+        <td>{{ p.name }}</td><td>{{ p.get_category_display }}</td>
+        <td class="text-end">{{ p.stock_quantity }}</td><td class="text-end">{{ p.reorder_level }}</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

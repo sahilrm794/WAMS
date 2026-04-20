@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: wams
+    env: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn wams.wsgi:application"
+    disk:
+      name: wams-db
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: DB_PATH
+        value: /var/data/db.sqlite3
+      - key: ADMIN_USERNAME
+        value: admin
+      - key: ADMIN_EMAIL
+        value: admin@wams.com
+      - key: ADMIN_PASSWORD
+        sync: false

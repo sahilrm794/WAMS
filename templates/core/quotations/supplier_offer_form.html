@@ -1,0 +1,228 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <div class="card border-success">
+    <div class="card-body py-3">
+      <p class="mb-0 text-muted">
+        <i class="bi bi-info-circle text-success me-2"></i>
+        List the parts you can supply, your offered price per unit, and the available quantity. The admin will review your quotation and raise a Purchase Order if accepted.
+      </p>
+    </div>
+  </div>
+</div>
+
+<form method="post" id="offerForm">
+  {% csrf_token %}
+  <div class="row g-3">
+
+    <!-- Left: form -->
+    <div class="col-lg-8">
+
+      <!-- Header details -->
+      <div class="card mb-3">
+        <div class="card-header">Quotation Details</div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-5">
+              <label class="form-label">{{ form.valid_until.label }}</label>
+              {{ form.valid_until }}
+              <div class="form-text">Until when is this offer valid?</div>
+              {% if form.valid_until.errors %}<div class="text-danger small">{{ form.valid_until.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-12">
+              <label class="form-label">{{ form.notes.label }}</label>
+              {{ form.notes }}
+              {% if form.notes.errors %}<div class="text-danger small">{{ form.notes.errors.0 }}</div>{% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Line items -->
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span>Parts You Can Supply</span>
+          <button type="button" class="btn btn-sm btn-outline-success" id="addItemBtn">
+            <i class="bi bi-plus-lg"></i> Add Part
+          </button>
+        </div>
+        <div class="card-body p-0">
+          {{ formset.management_form }}
+          <table class="table mb-0" id="itemsTable">
+            <thead class="table-light">
+              <tr>
+                <th>Part</th>
+                <th style="width:110px">Qty Available</th>
+                <th style="width:175px">Your Offered Price / Unit (₹)</th>
+                <th style="width:115px">Total Value</th>
+                <th style="width:46px"></th>
+              </tr>
+            </thead>
+            <tbody id="itemsBody">
+              {% for item_form in formset %}
+              <tr class="item-row">
+                <td>
+                  {{ item_form.part }}
+                  {% if item_form.id %}{{ item_form.id }}{% endif %}
+                  {{ item_form.DELETE.as_hidden }}
+                  {% if item_form.part.errors %}<div class="text-danger small">{{ item_form.part.errors.0 }}</div>{% endif %}
+                </td>
+                <td>
+                  {{ item_form.quantity }}
+                  {% if item_form.quantity.errors %}<div class="text-danger small">{{ item_form.quantity.errors.0 }}</div>{% endif %}
+                </td>
+                <td>
+                  {{ item_form.unit_cost }}
+                  <div class="form-text catalogue-price text-muted"></div>
+                  {% if item_form.unit_cost.errors %}<div class="text-danger small">{{ item_form.unit_cost.errors.0 }}</div>{% endif %}
+                </td>
+                <td><strong class="subtotal-display text-primary">₹0.00</strong></td>
+                <td>
+                  <button type="button" class="btn btn-xs btn-outline-danger remove-row" title="Remove">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+            <tfoot>
+              <tr class="table-light">
+                <td colspan="3" class="text-end fw-bold">Total Offer Value</td>
+                <td><strong id="grandTotal" class="text-primary">₹0.00</strong></td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <div class="card-footer text-muted small">
+          <i class="bi bi-lightbulb"></i> Current reference prices are shown as hints. Enter your actual offered price.
+        </div>
+      </div>
+
+      {% if formset.non_form_errors %}
+      <div class="alert alert-danger mt-2">{{ formset.non_form_errors.0 }}</div>
+      {% endif %}
+    </div>
+
+    <!-- Right: actions -->
+    <div class="col-lg-4">
+      <div class="card">
+        <div class="card-header">Submit Quotation</div>
+        <div class="card-body">
+          <div class="mb-3">
+            <div class="detail-label">Submitting as</div>
+            <div class="detail-value">{{ request.user.supplier_profile.company_name }}</div>
+          </div>
+          <div class="mb-3">
+            <div class="detail-label">Status after submission</div>
+            <div class="detail-value"><span class="badge-status badge-received">Received by Admin</span></div>
+          </div>
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-success">
+              <i class="bi bi-send"></i> Submit Quotation
+            </button>
+            <a href="{% url 'supplier_quotation_list' %}" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mt-3">
+        <div class="card-header">How It Works</div>
+        <div class="card-body p-3">
+          <ol class="mb-0 small text-muted ps-3">
+            <li class="mb-1">You submit your price quotation</li>
+            <li class="mb-1">Admin reviews your offered prices</li>
+            <li class="mb-1">Admin accepts and raises a Purchase Order</li>
+            <li>Parts are delivered and payment is processed</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  const tbody = document.getElementById('itemsBody');
+  const totalForms = document.getElementById('id_items-TOTAL_FORMS');
+  const grandTotal = document.getElementById('grandTotal');
+
+  function getRow(el) { return el.closest('.item-row'); }
+
+  function calcSubtotal(row) {
+    const qty   = parseFloat(row.querySelector('.qty-input').value)   || 0;
+    const price = parseFloat(row.querySelector('.price-input').value) || 0;
+    const sub   = qty * price;
+    row.querySelector('.subtotal-display').textContent = '₹' + sub.toFixed(2);
+    return sub;
+  }
+
+  function recalcTotal() {
+    let total = 0;
+    tbody.querySelectorAll('.item-row:not(.deleted-row)').forEach(row => {
+      total += calcSubtotal(row);
+    });
+    grandTotal.textContent = '₹' + total.toFixed(2);
+  }
+
+  // Show reference price hint when part is selected
+  tbody.addEventListener('change', function (e) {
+    if (!e.target.classList.contains('part-select')) return;
+    const row = getRow(e.target);
+    const selected = e.target.options[e.target.selectedIndex];
+    const refPrice = selected.getAttribute('data-price');
+    const hint = row.querySelector('.catalogue-price');
+    if (refPrice && hint) {
+      hint.textContent = 'Reference price: ₹' + parseFloat(refPrice).toFixed(2);
+    } else if (hint) {
+      hint.textContent = '';
+    }
+    recalcTotal();
+  });
+
+  tbody.addEventListener('input', function (e) {
+    if (e.target.classList.contains('qty-input') || e.target.classList.contains('price-input')) {
+      recalcTotal();
+    }
+  });
+
+  tbody.addEventListener('click', function (e) {
+    const btn = e.target.closest('.remove-row');
+    if (!btn) return;
+    const row = getRow(btn);
+    const del = row.querySelector('input[type=hidden][name$="-DELETE"]');
+    if (del) {
+      del.value = 'on';
+      row.style.display = 'none';
+      row.classList.add('deleted-row');
+    } else {
+      row.remove();
+      totalForms.value = parseInt(totalForms.value) - 1;
+    }
+    recalcTotal();
+  });
+
+  document.getElementById('addItemBtn').addEventListener('click', function () {
+    const count = parseInt(totalForms.value);
+    const tpl   = tbody.querySelector('.item-row');
+    const newRow = tpl.cloneNode(true);
+    newRow.classList.remove('deleted-row');
+    newRow.style.display = '';
+    newRow.innerHTML = newRow.innerHTML.replace(/-\d+-/g, '-' + count + '-');
+    newRow.querySelectorAll('input:not([type=hidden]), select').forEach(el => el.value = '');
+    newRow.querySelector('.subtotal-display').textContent = '₹0.00';
+    const hint = newRow.querySelector('.catalogue-price');
+    if (hint) hint.textContent = '';
+    tbody.appendChild(newRow);
+    totalForms.value = count + 1;
+  });
+
+  recalcTotal();
+})();
+</script>
+{% endblock %}

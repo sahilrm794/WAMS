@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}Dealer Quotations{% endblock %}
+{% block page_title %}Dealer Quotations{% endblock %}
+{% block content %}
+<div class="page-toolbar">
+  <form class="search-form" method="get">
+    <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Search…">
+    <select name="status" class="form-select">
+      <option value="">All Statuses</option>
+      {% for val, label in status_choices %}
+      <option value="{{ val }}" {% if status == val %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <button class="btn btn-outline-secondary">Filter</button>
+    {% if q or status %}<a href="{% url 'dealer_quotation_list' %}" class="btn btn-outline-secondary">Clear</a>{% endif %}
+  </form>
+  {% if user.role == 'admin' %}
+  <a href="{% url 'dealer_quotation_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> New Quotation</a>
+  {% elif user.role == 'dealer' %}
+  <a href="{% url 'dealer_quotation_create' %}" class="btn btn-primary"><i class="bi bi-send"></i> Submit Purchase Request</a>
+  {% endif %}
+</div>
+
+<div class="card">
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr><th>Number</th><th>Dealer</th><th>Issue Date</th><th>Valid Until</th><th>Amount</th><th>Status</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+      {% for q in page_obj %}
+      <tr>
+        <td><a href="{% url 'dealer_quotation_detail' q.pk %}">{{ q.quotation_number }}</a></td>
+        <td>{{ q.dealer.company_name }}</td>
+        <td>{{ q.issue_date }}</td>
+        <td>{{ q.valid_until }}</td>
+        <td>₹{{ q.total_amount|floatformat:2 }}</td>
+        <td><span class="badge-status badge-{{ q.status }}">{{ q.get_status_display }}</span></td>
+        <td><a href="{% url 'dealer_quotation_detail' q.pk %}" class="btn btn-xs btn-outline-primary">View</a></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="7" class="text-center text-muted py-4">No quotations found.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% include 'core/pagination.html' %}
+{% endblock %}

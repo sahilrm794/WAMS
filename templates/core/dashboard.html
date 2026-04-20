@@ -1,0 +1,336 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+{% if user.role == 'admin' %}
+<!-- Admin Dashboard -->
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-icon bg-primary-light"><i class="bi bi-box-seam text-primary"></i></div>
+      <div>
+        <div class="stat-value">{{ product_count }}</div>
+        <div class="stat-label">Active Products</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-icon bg-success-light"><i class="bi bi-tools text-success"></i></div>
+      <div>
+        <div class="stat-value">{{ part_count }}</div>
+        <div class="stat-label">Active Parts</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-icon bg-warning-light"><i class="bi bi-shop text-warning"></i></div>
+      <div>
+        <div class="stat-value">{{ dealer_count }}</div>
+        <div class="stat-label">Dealers</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-icon bg-info-light"><i class="bi bi-truck text-info"></i></div>
+      <div>
+        <div class="stat-value">{{ supplier_count }}</div>
+        <div class="stat-label">Suppliers</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-icon bg-primary-light"><i class="bi bi-currency-rupee text-primary"></i></div>
+      <div>
+        <div class="stat-value">₹{{ monthly_sales|floatformat:0 }}</div>
+        <div class="stat-label">Sales This Month</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-icon bg-danger-light"><i class="bi bi-cart3 text-danger"></i></div>
+      <div>
+        <div class="stat-value">₹{{ monthly_purchases|floatformat:0 }}</div>
+        <div class="stat-label">Purchases This Month</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card {% if low_stock_products > 0 %}border-warning{% endif %}">
+      <div class="stat-icon bg-warning-light"><i class="bi bi-exclamation-triangle text-warning"></i></div>
+      <div>
+        <div class="stat-value">{{ low_stock_products }}</div>
+        <div class="stat-label">Low Stock Products</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card {% if pending_dq > 0 %}border-info{% endif %}">
+      <div class="stat-icon bg-info-light"><i class="bi bi-file-earmark-text text-info"></i></div>
+      <div>
+        <div class="stat-value">{{ pending_dq }}</div>
+        <div class="stat-label">Pending Quotations</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Recent Sales</span>
+        <a href="{% url 'dealer_transaction_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead><tr><th>Invoice</th><th>Dealer</th><th>Amount</th><th>Status</th></tr></thead>
+          <tbody>
+          {% for t in recent_sales %}
+          <tr>
+            <td><a href="{% url 'dealer_transaction_detail' t.pk %}">{{ t.invoice_number }}</a></td>
+            <td>{{ t.dealer.company_name }}</td>
+            <td>₹{{ t.total_amount|floatformat:2 }}</td>
+            <td><span class="badge-status badge-{{ t.payment_status }}">{{ t.get_payment_status_display }}</span></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="text-center text-muted py-3">No transactions yet</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Recent Purchases</span>
+        <a href="{% url 'supplier_transaction_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead><tr><th>PO Number</th><th>Supplier</th><th>Amount</th><th>Status</th></tr></thead>
+          <tbody>
+          {% for t in recent_purchases %}
+          <tr>
+            <td><a href="{% url 'supplier_transaction_detail' t.pk %}">{{ t.purchase_order_number }}</a></td>
+            <td>{{ t.supplier.company_name }}</td>
+            <td>₹{{ t.total_amount|floatformat:2 }}</td>
+            <td><span class="badge-status badge-{{ t.payment_status }}">{{ t.get_payment_status_display }}</span></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="text-center text-muted py-3">No transactions yet</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% elif user.role == 'dealer' %}
+<!-- Dealer Dashboard -->
+{% if no_profile %}
+<div class="alert alert-warning">Your dealer profile has not been set up yet. Contact the admin.</div>
+{% else %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h6 class="mb-0 text-muted">Welcome, {{ dealer.company_name }}</h6>
+  <a href="{% url 'dealer_quotation_create' %}" class="btn btn-primary">
+    <i class="bi bi-send"></i> Submit New Purchase Request
+  </a>
+</div>
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-icon bg-primary-light"><i class="bi bi-file-earmark-text text-primary"></i></div>
+      <div>
+        <div class="stat-value">{{ quotation_count }}</div>
+        <div class="stat-label">Total Quotations</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-icon bg-success-light"><i class="bi bi-receipt text-success"></i></div>
+      <div>
+        <div class="stat-value">{{ transaction_count }}</div>
+        <div class="stat-label">Total Orders</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-icon bg-warning-light"><i class="bi bi-clock text-warning"></i></div>
+      <div>
+        <div class="stat-value">{{ pending_quotations }}</div>
+        <div class="stat-label">Open Quotations</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card {% if pending_payments > 0 %}border-danger{% endif %}">
+      <div class="stat-icon bg-danger-light"><i class="bi bi-exclamation-circle text-danger"></i></div>
+      <div>
+        <div class="stat-value">{{ pending_payments }}</div>
+        <div class="stat-label">Pending Payments</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Recent Quotations</span>
+        <a href="{% url 'dealer_quotation_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead><tr><th>Number</th><th>Amount</th><th>Valid Until</th><th>Status</th></tr></thead>
+          <tbody>
+          {% for q in recent_quotations %}
+          <tr>
+            <td><a href="{% url 'dealer_quotation_detail' q.pk %}">{{ q.quotation_number }}</a></td>
+            <td>₹{{ q.total_amount|floatformat:2 }}</td>
+            <td>{{ q.valid_until }}</td>
+            <td><span class="badge-status badge-{{ q.status }}">{{ q.get_status_display }}</span></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="text-center text-muted py-3">No quotations yet</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Recent Orders</span>
+        <a href="{% url 'dealer_transaction_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead><tr><th>Invoice</th><th>Amount</th><th>Date</th><th>Payment</th></tr></thead>
+          <tbody>
+          {% for t in recent_transactions %}
+          <tr>
+            <td><a href="{% url 'dealer_transaction_detail' t.pk %}">{{ t.invoice_number }}</a></td>
+            <td>₹{{ t.total_amount|floatformat:2 }}</td>
+            <td>{{ t.transaction_date }}</td>
+            <td><span class="badge-status badge-{{ t.payment_status }}">{{ t.get_payment_status_display }}</span></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="text-center text-muted py-3">No orders yet</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% elif user.role == 'supplier' %}
+<!-- Supplier Dashboard -->
+{% if no_profile %}
+<div class="alert alert-warning">Your supplier profile has not been set up yet. Contact the admin.</div>
+{% else %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h6 class="mb-0 text-muted">Welcome, {{ supplier.company_name }}</h6>
+  <a href="{% url 'supplier_quotation_create' %}" class="btn btn-success">
+    <i class="bi bi-send"></i> Submit Price Quotation
+  </a>
+</div>
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-icon bg-primary-light"><i class="bi bi-file-earmark-ruled text-primary"></i></div>
+      <div>
+        <div class="stat-value">{{ quotation_count }}</div>
+        <div class="stat-label">Total Quotations</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-icon bg-success-light"><i class="bi bi-cart3 text-success"></i></div>
+      <div>
+        <div class="stat-value">{{ transaction_count }}</div>
+        <div class="stat-label">Total Deliveries</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card">
+      <div class="stat-icon bg-warning-light"><i class="bi bi-clock text-warning"></i></div>
+      <div>
+        <div class="stat-value">{{ pending_quotations }}</div>
+        <div class="stat-label">Pending Requests</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Recent Quotations</span>
+        <a href="{% url 'supplier_quotation_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead><tr><th>Number</th><th>Amount</th><th>Valid Until</th><th>Status</th></tr></thead>
+          <tbody>
+          {% for q in recent_quotations %}
+          <tr>
+            <td><a href="{% url 'supplier_quotation_detail' q.pk %}">{{ q.quotation_number }}</a></td>
+            <td>₹{{ q.total_amount|floatformat:2 }}</td>
+            <td>{{ q.valid_until }}</td>
+            <td><span class="badge-status badge-{{ q.status }}">{{ q.get_status_display }}</span></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="text-center text-muted py-3">No quotations yet</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Recent Deliveries</span>
+        <a href="{% url 'supplier_transaction_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead><tr><th>PO Number</th><th>Amount</th><th>Date</th><th>Payment</th></tr></thead>
+          <tbody>
+          {% for t in recent_transactions %}
+          <tr>
+            <td><a href="{% url 'supplier_transaction_detail' t.pk %}">{{ t.purchase_order_number }}</a></td>
+            <td>₹{{ t.total_amount|floatformat:2 }}</td>
+            <td>{{ t.transaction_date }}</td>
+            <td><span class="badge-status badge-{{ t.payment_status }}">{{ t.get_payment_status_display }}</span></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="text-center text-muted py-3">No deliveries yet</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endif %}
+{% endblock %}

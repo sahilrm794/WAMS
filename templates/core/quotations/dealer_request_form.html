@@ -1,0 +1,231 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="request-intro mb-4">
+  <div class="card border-primary">
+    <div class="card-body py-3">
+      <p class="mb-0 text-muted">
+        <i class="bi bi-info-circle text-primary me-2"></i>
+        Fill in the products you need and your expected budget price per unit. The admin will review your request and confirm pricing. You'll be notified once the quotation is accepted.
+      </p>
+    </div>
+  </div>
+</div>
+
+<form method="post" id="requestForm">
+  {% csrf_token %}
+  <div class="row g-3">
+
+    <!-- Left: form -->
+    <div class="col-lg-8">
+
+      <!-- Header details -->
+      <div class="card mb-3">
+        <div class="card-header">Request Details</div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-5">
+              <label class="form-label">{{ form.valid_until.label }}</label>
+              {{ form.valid_until }}
+              <div class="form-text">When do you need these items by?</div>
+              {% if form.valid_until.errors %}<div class="text-danger small">{{ form.valid_until.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-12">
+              <label class="form-label">{{ form.notes.label }}</label>
+              {{ form.notes }}
+              {% if form.notes.errors %}<div class="text-danger small">{{ form.notes.errors.0 }}</div>{% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Line items -->
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span>Products Requested</span>
+          <button type="button" class="btn btn-sm btn-outline-primary" id="addItemBtn">
+            <i class="bi bi-plus-lg"></i> Add Item
+          </button>
+        </div>
+        <div class="card-body p-0">
+          {{ formset.management_form }}
+          <table class="table mb-0" id="itemsTable">
+            <thead class="table-light">
+              <tr>
+                <th>Product</th>
+                <th style="width:95px">Qty Needed</th>
+                <th style="width:155px">Budget Price / Unit (₹)</th>
+                <th style="width:115px">Est. Total</th>
+                <th style="width:46px"></th>
+              </tr>
+            </thead>
+            <tbody id="itemsBody">
+              {% for item_form in formset %}
+              <tr class="item-row">
+                <td>
+                  {{ item_form.product }}
+                  {% if item_form.id %}{{ item_form.id }}{% endif %}
+                  {{ item_form.DELETE.as_hidden }}
+                  {% if item_form.product.errors %}<div class="text-danger small">{{ item_form.product.errors.0 }}</div>{% endif %}
+                </td>
+                <td>
+                  {{ item_form.quantity }}
+                  {% if item_form.quantity.errors %}<div class="text-danger small">{{ item_form.quantity.errors.0 }}</div>{% endif %}
+                </td>
+                <td>
+                  {{ item_form.unit_price }}
+                  <div class="form-text catalogue-price"></div>
+                </td>
+                <td><strong class="subtotal-display text-success">₹0.00</strong></td>
+                <td>
+                  <button type="button" class="btn btn-xs btn-outline-danger remove-row" title="Remove">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+            <tfoot>
+              <tr class="table-light">
+                <td colspan="3" class="text-end fw-bold">Estimated Total</td>
+                <td><strong id="grandTotal" class="text-success">₹0.00</strong></td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <div class="card-footer text-muted small">
+          <i class="bi bi-lightbulb"></i> Catalogue prices are auto-filled when you select a product. You can adjust the budget price.
+        </div>
+      </div>
+
+      {% if formset.non_form_errors %}
+      <div class="alert alert-danger mt-2">{{ formset.non_form_errors.0 }}</div>
+      {% endif %}
+    </div>
+
+    <!-- Right: actions -->
+    <div class="col-lg-4">
+      <div class="card">
+        <div class="card-header">Submit Request</div>
+        <div class="card-body">
+          <div class="mb-3">
+            <div class="detail-label">Requesting as</div>
+            <div class="detail-value">{{ request.user.dealer_profile.company_name }}</div>
+          </div>
+          <div class="mb-3">
+            <div class="detail-label">Status after submission</div>
+            <div class="detail-value"><span class="badge-status badge-sent">Sent to Admin</span></div>
+          </div>
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-send"></i> Submit Request
+            </button>
+            <a href="{% url 'dealer_quotation_list' %}" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mt-3">
+        <div class="card-header">How It Works</div>
+        <div class="card-body p-3">
+          <ol class="mb-0 small text-muted ps-3">
+            <li class="mb-1">You submit this purchase request</li>
+            <li class="mb-1">Admin reviews and sets final pricing</li>
+            <li class="mb-1">Admin accepts and raises an invoice</li>
+            <li>Stock is dispatched and invoice is issued</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  const tbody = document.getElementById('itemsBody');
+  const totalForms = document.getElementById('id_items-TOTAL_FORMS');
+  const grandTotal = document.getElementById('grandTotal');
+
+  function getRow(el) { return el.closest('.item-row'); }
+
+  function calcSubtotal(row) {
+    const qty   = parseFloat(row.querySelector('.qty-input').value)   || 0;
+    const price = parseFloat(row.querySelector('.price-input').value) || 0;
+    const sub   = qty * price;
+    row.querySelector('.subtotal-display').textContent = '₹' + sub.toFixed(2);
+    return sub;
+  }
+
+  function recalcTotal() {
+    let total = 0;
+    tbody.querySelectorAll('.item-row:not(.deleted-row)').forEach(row => {
+      total += calcSubtotal(row);
+    });
+    grandTotal.textContent = '₹' + total.toFixed(2);
+  }
+
+  // Auto-fill price when product is selected
+  tbody.addEventListener('change', function (e) {
+    if (!e.target.classList.contains('product-select')) return;
+    const row = getRow(e.target);
+    const selected = e.target.options[e.target.selectedIndex];
+    const price = selected.getAttribute('data-price');
+    const stock = selected.getAttribute('data-stock');
+    const priceInput = row.querySelector('.price-input');
+    const hint = row.querySelector('.catalogue-price');
+    if (price) {
+      priceInput.value = price;
+      hint.textContent = 'Catalogue price: ₹' + parseFloat(price).toFixed(2) + (stock ? ' | In stock: ' + stock : '');
+      hint.classList.add('text-muted');
+    } else {
+      hint.textContent = '';
+    }
+    recalcTotal();
+  });
+
+  tbody.addEventListener('input', function (e) {
+    if (e.target.classList.contains('qty-input') || e.target.classList.contains('price-input')) {
+      recalcTotal();
+    }
+  });
+
+  tbody.addEventListener('click', function (e) {
+    const btn = e.target.closest('.remove-row');
+    if (!btn) return;
+    const row = getRow(btn);
+    const del = row.querySelector('input[type=hidden][name$="-DELETE"]');
+    if (del) {
+      del.value = 'on';
+      row.style.display = 'none';
+      row.classList.add('deleted-row');
+    } else {
+      row.remove();
+      totalForms.value = parseInt(totalForms.value) - 1;
+    }
+    recalcTotal();
+  });
+
+  document.getElementById('addItemBtn').addEventListener('click', function () {
+    const count = parseInt(totalForms.value);
+    const tpl   = tbody.querySelector('.item-row');
+    const newRow = tpl.cloneNode(true);
+    newRow.classList.remove('deleted-row');
+    newRow.style.display = '';
+    newRow.innerHTML = newRow.innerHTML.replace(/-\d+-/g, '-' + count + '-');
+    newRow.querySelectorAll('input:not([type=hidden]), select').forEach(el => el.value = '');
+    newRow.querySelector('.subtotal-display').textContent = '₹0.00';
+    const hint = newRow.querySelector('.catalogue-price');
+    if (hint) hint.textContent = '';
+    tbody.appendChild(newRow);
+    totalForms.value = count + 1;
+  });
+
+  recalcTotal();
+})();
+</script>
+{% endblock %}

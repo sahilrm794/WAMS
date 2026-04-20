@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}Parts{% endblock %}
+{% block page_title %}Parts{% endblock %}
+{% block content %}
+<div class="page-toolbar">
+  <form class="search-form" method="get">
+    <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Search by name or ID…">
+    <button class="btn btn-outline-secondary">Search</button>
+    {% if q %}<a href="{% url 'part_list' %}" class="btn btn-outline-secondary">Clear</a>{% endif %}
+  </form>
+  {% if user.role == 'admin' %}
+  <a href="{% url 'part_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Add Part</a>
+  {% endif %}
+</div>
+
+<div class="card">
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr>
+          <th>Part ID</th><th>Name</th><th>Unit Cost</th><th>Stock</th>
+          <th>Supplier</th><th>Status</th>
+          {% if user.role == 'admin' %}<th>Actions</th>{% endif %}
+        </tr>
+      </thead>
+      <tbody>
+      {% for p in page_obj %}
+      <tr class="{% if p.low_stock %}table-warning{% endif %}">
+        <td>{{ p.part_id }}</td>
+        <td>{{ p.name }}</td>
+        <td>₹{{ p.unit_cost|floatformat:2 }}</td>
+        <td>
+          {{ p.stock_quantity }}
+          {% if p.low_stock %}<i class="bi bi-exclamation-triangle text-danger ms-1" title="Low stock"></i>{% endif %}
+        </td>
+        <td>{{ p.supplier.company_name|default:"—" }}</td>
+        <td>
+          {% if p.is_active %}
+          <span class="badge bg-success-subtle text-success">Active</span>
+          {% else %}
+          <span class="badge bg-secondary">Inactive</span>
+          {% endif %}
+        </td>
+        {% if user.role == 'admin' %}
+        <td>
+          <a href="{% url 'part_update' p.pk %}" class="btn btn-xs btn-outline-primary">Edit</a>
+          <a href="{% url 'part_delete' p.pk %}" class="btn btn-xs btn-outline-danger">Delete</a>
+          <a href="{% url 'stock_adjust_part' p.pk %}" class="btn btn-xs btn-outline-warning">Adjust Stock</a>
+        </td>
+        {% endif %}
+      </tr>
+      {% empty %}
+      <tr><td colspan="7" class="text-center text-muted py-4">No parts found.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% include 'core/pagination.html' %}
+{% endblock %}

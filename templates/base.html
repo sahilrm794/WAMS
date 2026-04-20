@@ -1,0 +1,177 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WAMS – {% block title %}Dashboard{% endblock %}</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+{% block extra_css %}{% endblock %}
+</head>
+<body>
+<div class="app-wrapper">
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-title">WAMS</span>
+      <span class="brand-sub">Manufacturing System</span>
+    </div>
+    <ul class="sidebar-menu">
+      <li>
+        <a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+          <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+      </li>
+
+      {% if user.role == 'admin' %}
+      <li class="menu-section">Inventory</li>
+      <li>
+        <a href="{% url 'product_list' %}" class="{% if 'product' in request.resolver_match.url_name %}active{% endif %}">
+          <i class="bi bi-box-seam"></i> Products
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'part_list' %}" class="{% if 'part' in request.resolver_match.url_name %}active{% endif %}">
+          <i class="bi bi-tools"></i> Parts
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'stock_overview' %}" class="{% if 'stock' in request.resolver_match.url_name %}active{% endif %}">
+          <i class="bi bi-boxes"></i> Stock
+        </a>
+      </li>
+
+      <li class="menu-section">Stakeholders</li>
+      <li>
+        <a href="{% url 'dealer_list' %}" class="{% if 'dealer_list' in request.resolver_match.url_name or 'dealer_create' in request.resolver_match.url_name or 'dealer_update' in request.resolver_match.url_name %}active{% endif %}">
+          <i class="bi bi-shop"></i> Dealers
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'supplier_list' %}" class="{% if 'supplier_list' in request.resolver_match.url_name or 'supplier_create' in request.resolver_match.url_name or 'supplier_update' in request.resolver_match.url_name %}active{% endif %}">
+          <i class="bi bi-truck"></i> Suppliers
+        </a>
+      </li>
+
+      <li class="menu-section">Commerce</li>
+      <li>
+        <a href="{% url 'dealer_quotation_list' %}" class="{% if 'dealer_quotation' in request.resolver_match.url_name %}active{% endif %}">
+          <i class="bi bi-file-earmark-text"></i> Dealer Quotations
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'supplier_quotation_list' %}" class="{% if 'supplier_quotation' in request.resolver_match.url_name %}active{% endif %}">
+          <i class="bi bi-file-earmark-ruled"></i> Supplier Quotations
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'dealer_transaction_list' %}" class="{% if 'dealer_transaction' in request.resolver_match.url_name %}active{% endif %}">
+          <i class="bi bi-receipt"></i> Sales Invoices
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'supplier_transaction_list' %}" class="{% if 'supplier_transaction' in request.resolver_match.url_name %}active{% endif %}">
+          <i class="bi bi-cart3"></i> Purchase Orders
+        </a>
+      </li>
+
+      <li class="menu-section">Admin</li>
+      <li>
+        <a href="{% url 'reports' %}" class="{% if 'reports' in request.resolver_match.url_name %}active{% endif %}">
+          <i class="bi bi-bar-chart-line"></i> Reports
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'user_list' %}" class="{% if 'user' in request.resolver_match.url_name %}active{% endif %}">
+          <i class="bi bi-people"></i> Users
+        </a>
+      </li>
+
+      {% elif user.role == 'dealer' %}
+      <li class="menu-section">Catalogue</li>
+      <li>
+        <a href="{% url 'product_list' %}" class="{% if 'product' in request.resolver_match.url_name %}active{% endif %}">
+          <i class="bi bi-box-seam"></i> Products
+        </a>
+      </li>
+      <li class="menu-section">My Account</li>
+      <li>
+        <a href="{% url 'dealer_quotation_list' %}" class="{% if 'dealer_quotation' in request.resolver_match.url_name %}active{% endif %}">
+          <i class="bi bi-file-earmark-text"></i> My Quotations
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'dealer_transaction_list' %}" class="{% if 'dealer_transaction' in request.resolver_match.url_name %}active{% endif %}">
+          <i class="bi bi-receipt"></i> My Orders
+        </a>
+      </li>
+
+      {% elif user.role == 'supplier' %}
+      <li class="menu-section">Catalogue</li>
+      <li>
+        <a href="{% url 'part_list' %}" class="{% if 'part' in request.resolver_match.url_name %}active{% endif %}">
+          <i class="bi bi-tools"></i> Parts
+        </a>
+      </li>
+      <li class="menu-section">My Account</li>
+      <li>
+        <a href="{% url 'supplier_quotation_list' %}" class="{% if 'supplier_quotation' in request.resolver_match.url_name %}active{% endif %}">
+          <i class="bi bi-file-earmark-ruled"></i> My Quotations
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'supplier_transaction_list' %}" class="{% if 'supplier_transaction' in request.resolver_match.url_name %}active{% endif %}">
+          <i class="bi bi-cart3"></i> My Deliveries
+        </a>
+      </li>
+      {% endif %}
+    </ul>
+  </nav>
+
+  <!-- Main content -->
+  <div class="content-area" id="contentArea">
+    <header class="topbar">
+      <button class="sidebar-toggle" id="sidebarToggle" title="Toggle sidebar">
+        <i class="bi bi-list"></i>
+      </button>
+      <span class="topbar-title">{% block page_title %}{% endblock %}</span>
+      <div class="topbar-right">
+        <span class="badge bg-secondary text-uppercase me-2">{{ user.role }}</span>
+        <span class="me-3">{{ user.get_full_name|default:user.username }}</span>
+        <a href="{% url 'change_password' %}" class="btn btn-sm btn-outline-secondary me-1">
+          <i class="bi bi-key"></i> Password
+        </a>
+        <a href="{% url 'logout' %}" class="btn btn-sm btn-outline-danger">
+          <i class="bi bi-box-arrow-right"></i> Logout
+        </a>
+      </div>
+    </header>
+
+    <main class="main-content">
+      {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-3" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+      {% endif %}
+
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  document.getElementById('sidebarToggle').addEventListener('click', function() {
+    document.getElementById('sidebar').classList.toggle('collapsed');
+    document.getElementById('contentArea').classList.toggle('expanded');
+  });
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

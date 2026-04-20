@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}Dealers{% endblock %}
+{% block page_title %}Dealers{% endblock %}
+{% block content %}
+<div class="page-toolbar">
+  <form class="search-form" method="get">
+    <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Search by name or city…">
+    <button class="btn btn-outline-secondary">Search</button>
+    {% if q %}<a href="{% url 'dealer_list' %}" class="btn btn-outline-secondary">Clear</a>{% endif %}
+  </form>
+  <a href="{% url 'dealer_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Add Dealer</a>
+</div>
+
+<div class="card">
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr><th>Company</th><th>Contact</th><th>City</th><th>Phone</th><th>Credit Limit</th><th>Status</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+      {% for d in page_obj %}
+      <tr>
+        <td>
+          <strong>{{ d.company_name }}</strong>
+          <div class="text-muted small">{{ d.user.username }}</div>
+        </td>
+        <td>{{ d.contact_person }}</td>
+        <td>{{ d.city }}</td>
+        <td>{{ d.phone }}</td>
+        <td>₹{{ d.credit_limit|floatformat:0 }}</td>
+        <td>
+          {% if d.is_active %}
+          <span class="badge bg-success-subtle text-success">Active</span>
+          {% else %}
+          <span class="badge bg-secondary">Inactive</span>
+          {% endif %}
+        </td>
+        <td>
+          <a href="{% url 'dealer_update' d.pk %}" class="btn btn-xs btn-outline-primary">Edit</a>
+          <a href="{% url 'dealer_delete' d.pk %}" class="btn btn-xs btn-outline-danger">Deactivate</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="7" class="text-center text-muted py-4">No dealers found.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% include 'core/pagination.html' %}
+{% endblock %}
