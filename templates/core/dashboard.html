@@ -7,8 +7,8 @@
 <!-- Admin Dashboard -->
 <div class="row g-3 mb-4">
   <div class="col-sm-6 col-xl-3">
-    <div class="stat-card">
-      <div class="stat-icon bg-primary-light"><i class="bi bi-box-seam text-primary"></i></div>
+    <div class="stat-card accent-orange">
+      <div class="stat-icon bg-orange-light"><i class="bi bi-box-seam"></i></div>
       <div>
         <div class="stat-value">{{ product_count }}</div>
         <div class="stat-label">Active Products</div>
@@ -16,8 +16,8 @@
     </div>
   </div>
   <div class="col-sm-6 col-xl-3">
-    <div class="stat-card">
-      <div class="stat-icon bg-success-light"><i class="bi bi-tools text-success"></i></div>
+    <div class="stat-card accent-teal">
+      <div class="stat-icon bg-teal-light"><i class="bi bi-tools"></i></div>
       <div>
         <div class="stat-value">{{ part_count }}</div>
         <div class="stat-label">Active Parts</div>
@@ -25,8 +25,8 @@
     </div>
   </div>
   <div class="col-sm-6 col-xl-3">
-    <div class="stat-card">
-      <div class="stat-icon bg-warning-light"><i class="bi bi-shop text-warning"></i></div>
+    <div class="stat-card accent-amber">
+      <div class="stat-icon bg-amber-light"><i class="bi bi-shop"></i></div>
       <div>
         <div class="stat-value">{{ dealer_count }}</div>
         <div class="stat-label">Dealers</div>
@@ -34,8 +34,8 @@
     </div>
   </div>
   <div class="col-sm-6 col-xl-3">
-    <div class="stat-card">
-      <div class="stat-icon bg-info-light"><i class="bi bi-truck text-info"></i></div>
+    <div class="stat-card accent-indigo">
+      <div class="stat-icon bg-indigo-light"><i class="bi bi-truck"></i></div>
       <div>
         <div class="stat-value">{{ supplier_count }}</div>
         <div class="stat-label">Suppliers</div>
@@ -46,8 +46,8 @@
 
 <div class="row g-3 mb-4">
   <div class="col-sm-6 col-xl-3">
-    <div class="stat-card">
-      <div class="stat-icon bg-primary-light"><i class="bi bi-currency-rupee text-primary"></i></div>
+    <div class="stat-card accent-indigo">
+      <div class="stat-icon bg-indigo-light"><i class="bi bi-currency-rupee"></i></div>
       <div>
         <div class="stat-value">₹{{ monthly_sales|floatformat:0 }}</div>
         <div class="stat-label">Sales This Month</div>
@@ -55,8 +55,8 @@
     </div>
   </div>
   <div class="col-sm-6 col-xl-3">
-    <div class="stat-card">
-      <div class="stat-icon bg-danger-light"><i class="bi bi-cart3 text-danger"></i></div>
+    <div class="stat-card accent-rose">
+      <div class="stat-icon bg-rose-light"><i class="bi bi-cart3"></i></div>
       <div>
         <div class="stat-value">₹{{ monthly_purchases|floatformat:0 }}</div>
         <div class="stat-label">Purchases This Month</div>
@@ -64,8 +64,8 @@
     </div>
   </div>
   <div class="col-sm-6 col-xl-3">
-    <div class="stat-card {% if low_stock_products > 0 %}border-warning{% endif %}">
-      <div class="stat-icon bg-warning-light"><i class="bi bi-exclamation-triangle text-warning"></i></div>
+    <div class="stat-card {% if low_stock_products > 0 %}accent-amber{% endif %}">
+      <div class="stat-icon bg-amber-light"><i class="bi bi-exclamation-triangle"></i></div>
       <div>
         <div class="stat-value">{{ low_stock_products }}</div>
         <div class="stat-label">Low Stock Products</div>
@@ -73,8 +73,8 @@
     </div>
   </div>
   <div class="col-sm-6 col-xl-3">
-    <div class="stat-card {% if pending_dq > 0 %}border-info{% endif %}">
-      <div class="stat-icon bg-info-light"><i class="bi bi-file-earmark-text text-info"></i></div>
+    <div class="stat-card {% if pending_dq > 0 %}accent-indigo{% endif %}">
+      <div class="stat-icon bg-indigo-light"><i class="bi bi-file-earmark-text"></i></div>
       <div>
         <div class="stat-value">{{ pending_dq }}</div>
         <div class="stat-label">Pending Quotations</div>
@@ -149,8 +149,8 @@
 </div>
 <div class="row g-3 mb-4">
   <div class="col-sm-6 col-xl-3">
-    <div class="stat-card">
-      <div class="stat-icon bg-primary-light"><i class="bi bi-file-earmark-text text-primary"></i></div>
+    <div class="stat-card accent-indigo">
+      <div class="stat-icon bg-indigo-light"><i class="bi bi-file-earmark-text"></i></div>
       <div>
         <div class="stat-value">{{ quotation_count }}</div>
         <div class="stat-label">Total Quotations</div>
@@ -158,8 +158,8 @@
     </div>
   </div>
   <div class="col-sm-6 col-xl-3">
-    <div class="stat-card">
-      <div class="stat-icon bg-success-light"><i class="bi bi-receipt text-success"></i></div>
+    <div class="stat-card accent-teal">
+      <div class="stat-icon bg-teal-light"><i class="bi bi-receipt"></i></div>
       <div>
         <div class="stat-value">{{ transaction_count }}</div>
         <div class="stat-label">Total Orders</div>
@@ -167,8 +167,8 @@
     </div>
   </div>
   <div class="col-sm-6 col-xl-3">
-    <div class="stat-card">
-      <div class="stat-icon bg-warning-light"><i class="bi bi-clock text-warning"></i></div>
+    <div class="stat-card accent-amber">
+      <div class="stat-icon bg-amber-light"><i class="bi bi-clock"></i></div>
       <div>
         <div class="stat-value">{{ pending_quotations }}</div>
         <div class="stat-label">Open Quotations</div>
@@ -176,8 +176,8 @@
     </div>
   </div>
   <div class="col-sm-6 col-xl-3">
-    <div class="stat-card {% if pending_payments > 0 %}border-danger{% endif %}">
-      <div class="stat-icon bg-danger-light"><i class="bi bi-exclamation-circle text-danger"></i></div>
+    <div class="stat-card {% if pending_payments > 0 %}accent-rose{% endif %}">
+      <div class="stat-icon bg-rose-light"><i class="bi bi-exclamation-circle"></i></div>
       <div>
         <div class="stat-value">{{ pending_payments }}</div>
         <div class="stat-label">Pending Payments</div>
@@ -252,8 +252,8 @@
 </div>
 <div class="row g-3 mb-4">
   <div class="col-sm-6 col-xl-3">
-    <div class="stat-card">
-      <div class="stat-icon bg-primary-light"><i class="bi bi-file-earmark-ruled text-primary"></i></div>
+    <div class="stat-card accent-indigo">
+      <div class="stat-icon bg-indigo-light"><i class="bi bi-file-earmark-ruled"></i></div>
       <div>
         <div class="stat-value">{{ quotation_count }}</div>
         <div class="stat-label">Total Quotations</div>
@@ -261,8 +261,8 @@
     </div>
   </div>
   <div class="col-sm-6 col-xl-3">
-    <div class="stat-card">
-      <div class="stat-icon bg-success-light"><i class="bi bi-cart3 text-success"></i></div>
+    <div class="stat-card accent-teal">
+      <div class="stat-icon bg-teal-light"><i class="bi bi-cart3"></i></div>
       <div>
         <div class="stat-value">{{ transaction_count }}</div>
         <div class="stat-label">Total Deliveries</div>
@@ -270,8 +270,8 @@
     </div>
   </div>
   <div class="col-sm-6 col-xl-3">
-    <div class="stat-card">
-      <div class="stat-icon bg-warning-light"><i class="bi bi-clock text-warning"></i></div>
+    <div class="stat-card accent-amber">
+      <div class="stat-icon bg-amber-light"><i class="bi bi-clock"></i></div>
       <div>
         <div class="stat-value">{{ pending_quotations }}</div>
         <div class="stat-label">Pending Requests</div>

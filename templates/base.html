@@ -129,6 +129,15 @@
       </li>
       {% endif %}
     </ul>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="avatar" style="box-shadow: 0 2px 12px rgba(249,115,22,0.5);">{{ user.username|slice:":1"|upper }}</div>
+        <div>
+          <div class="user-name">{{ user.get_full_name|default:user.username }}</div>
+          <div class="user-role" style="color: var(--sidebar-accent);">{{ user.get_role_display }}</div>
+        </div>
+      </div>
+    </div>
   </nav>
 
   <!-- Main content -->

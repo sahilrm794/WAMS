@@ -13,7 +13,7 @@
           </thead>
           <tbody>
           {% for p in products %}
-          <tr class="{% if p.low_stock %}table-warning{% endif %}">
+          <tr class="{% if p.low_stock %}table-danger-row{% endif %}">
             <td>
               <strong>{{ p.name }}</strong>
               <div class="text-muted small">{{ p.product_id }}</div>
@@ -21,7 +21,7 @@
             <td>{{ p.get_category_display }}</td>
             <td class="text-end">
               {{ p.stock_quantity }}
-              {% if p.low_stock %}<i class="bi bi-exclamation-triangle text-danger ms-1"></i>{% endif %}
+              {% if p.low_stock %}<i class="bi bi-exclamation-triangle" style="color:var(--warning);ms-1"></i>{% endif %}
             </td>
             <td class="text-end text-muted">{{ p.reorder_level }}</td>
             <td>
@@ -47,7 +47,7 @@
           </thead>
           <tbody>
           {% for p in parts %}
-          <tr class="{% if p.low_stock %}table-warning{% endif %}">
+          <tr class="{% if p.low_stock %}table-danger-row{% endif %}">
             <td>
               <strong>{{ p.name }}</strong>
               <div class="text-muted small">{{ p.part_id }}</div>
@@ -55,7 +55,7 @@
             <td>{{ p.supplier.company_name|default:"—" }}</td>
             <td class="text-end">
               {{ p.stock_quantity }}
-              {% if p.low_stock %}<i class="bi bi-exclamation-triangle text-danger ms-1"></i>{% endif %}
+              {% if p.low_stock %}<i class="bi bi-exclamation-triangle" style="color:var(--warning);ms-1"></i>{% endif %}
             </td>
             <td class="text-end text-muted">{{ p.reorder_level }}</td>
             <td>
@@ -84,7 +84,7 @@
       <tr>
         <td class="text-nowrap">{{ log.created_at|date:"d M Y H:i" }}</td>
         <td>{{ log.product.name|default:log.part.name }}</td>
-        <td><span class="badge bg-secondary">{{ log.get_change_type_display }}</span></td>
+        <td><span class="badge-status badge-draft">{{ log.get_change_type_display }}</span></td>
         <td class="text-end {% if log.quantity_change > 0 %}text-success{% else %}text-danger{% endif %}">
           {{ log.quantity_change|floatformat:0 }}
         </td>

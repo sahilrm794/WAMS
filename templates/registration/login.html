@@ -6,14 +6,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WAMS – Login</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 <link rel="stylesheet" href="{% static 'css/style.css' %}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body class="login-page">
 <div class="login-container">
   <div class="login-card">
     <div class="login-header">
-      <h2>WAMS</h2>
+      <h2>W<span class="accent">A</span>MS</h2>
       <p>Web Automated Manufacturing System</p>
+      <div style="position:absolute;bottom:-1px;left:0;right:0;height:4px;background:linear-gradient(90deg,#f97316,#ef4444,#a78bfa);border-radius:0;"></div>
     </div>
     <div class="login-body">
       {% if messages %}
@@ -25,19 +29,21 @@
         {% csrf_token %}
         <div class="mb-3">
           <label class="form-label">Username</label>
-          {{ form.username }}
+          <input type="text" name="username" class="form-control" placeholder="Enter username" autofocus required>
           {% if form.username.errors %}
-            <div class="text-danger small">{{ form.username.errors.0 }}</div>
+            <div class="text-danger small mt-1">{{ form.username.errors.0 }}</div>
           {% endif %}
         </div>
         <div class="mb-4">
           <label class="form-label">Password</label>
-          {{ form.password }}
+          <input type="password" name="password" class="form-control" placeholder="Enter password" required>
           {% if form.password.errors %}
-            <div class="text-danger small">{{ form.password.errors.0 }}</div>
+            <div class="text-danger small mt-1">{{ form.password.errors.0 }}</div>
           {% endif %}
         </div>
-        <button type="submit" class="btn btn-primary w-100">Sign In</button>
+        <button type="submit" class="btn btn-primary w-100">
+          <i class="bi bi-box-arrow-in-right me-1"></i> Sign In
+        </button>
       </form>
     </div>
   </div>

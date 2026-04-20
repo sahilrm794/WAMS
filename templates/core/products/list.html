@@ -31,7 +31,7 @@
       </thead>
       <tbody>
       {% for p in page_obj %}
-      <tr class="{% if p.low_stock %}table-warning{% endif %}">
+      <tr class="{% if p.low_stock %}table-danger-row{% endif %}">
         <td>{{ p.product_id }}</td>
         <td>{{ p.name }}</td>
         <td>{{ p.get_category_display }}</td>
@@ -42,9 +42,9 @@
         </td>
         <td>
           {% if p.is_active %}
-          <span class="badge bg-success-subtle text-success">Active</span>
+          <span class="badge-status badge-accepted">Active</span>
           {% else %}
-          <span class="badge bg-secondary">Inactive</span>
+          <span class="badge-status badge-draft">Inactive</span>
           {% endif %}
         </td>
         {% if user.role == 'admin' %}

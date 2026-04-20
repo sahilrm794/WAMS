@@ -30,9 +30,9 @@
         <td>₹{{ d.credit_limit|floatformat:0 }}</td>
         <td>
           {% if d.is_active %}
-          <span class="badge bg-success-subtle text-success">Active</span>
+          <span class="badge-status badge-accepted">Active</span>
           {% else %}
-          <span class="badge bg-secondary">Inactive</span>
+          <span class="badge-status badge-draft">Inactive</span>
           {% endif %}
         </td>
         <td>

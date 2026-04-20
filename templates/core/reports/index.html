@@ -25,8 +25,8 @@
 <!-- Summary cards -->
 <div class="row g-3 mb-4">
   <div class="col-sm-6 col-xl-3">
-    <div class="stat-card">
-      <div class="stat-icon bg-success-light"><i class="bi bi-receipt text-success"></i></div>
+    <div class="stat-card accent-green">
+      <div class="stat-icon bg-green-light"><i class="bi bi-receipt"></i></div>
       <div>
         <div class="stat-value">₹{{ total_sales|floatformat:0 }}</div>
         <div class="stat-label">Total Sales ({{ sales_count }} invoices)</div>
@@ -34,8 +34,8 @@
     </div>
   </div>
   <div class="col-sm-6 col-xl-3">
-    <div class="stat-card">
-      <div class="stat-icon bg-danger-light"><i class="bi bi-cart3 text-danger"></i></div>
+    <div class="stat-card accent-rose">
+      <div class="stat-icon bg-rose-light"><i class="bi bi-cart3"></i></div>
       <div>
         <div class="stat-value">₹{{ total_purchases|floatformat:0 }}</div>
         <div class="stat-label">Total Purchases ({{ purchases_count }} POs)</div>
@@ -43,8 +43,8 @@
     </div>
   </div>
   <div class="col-sm-6 col-xl-3">
-    <div class="stat-card {% if low_products.count > 0 %}border-warning{% endif %}">
-      <div class="stat-icon bg-warning-light"><i class="bi bi-box-seam text-warning"></i></div>
+    <div class="stat-card {% if low_products.count > 0 %}accent-amber{% endif %}">
+      <div class="stat-icon bg-amber-light"><i class="bi bi-box-seam"></i></div>
       <div>
         <div class="stat-value">{{ low_products.count }}</div>
         <div class="stat-label">Low Stock Products</div>
@@ -52,8 +52,8 @@
     </div>
   </div>
   <div class="col-sm-6 col-xl-3">
-    <div class="stat-card {% if low_parts.count > 0 %}border-warning{% endif %}">
-      <div class="stat-icon bg-warning-light"><i class="bi bi-tools text-warning"></i></div>
+    <div class="stat-card {% if low_parts.count > 0 %}accent-amber{% endif %}">
+      <div class="stat-icon bg-amber-light"><i class="bi bi-tools"></i></div>
       <div>
         <div class="stat-value">{{ low_parts.count }}</div>
         <div class="stat-label">Low Stock Parts</div>
@@ -160,13 +160,13 @@
 
 {% if low_products %}
 <div class="card mb-3">
-  <div class="card-header text-warning"><i class="bi bi-exclamation-triangle"></i> Low Stock Products</div>
+  <div class="card-header" style="color:var(--warning);"><i class="bi bi-exclamation-triangle"></i> Low Stock Products</div>
   <div class="card-body p-0">
     <table class="table mb-0">
       <thead><tr><th>Product</th><th>Category</th><th class="text-end">Stock</th><th class="text-end">Reorder At</th></tr></thead>
       <tbody>
       {% for p in low_products %}
-      <tr class="table-warning">
+      <tr class="table-danger-row">
         <td>{{ p.name }}</td><td>{{ p.get_category_display }}</td>
         <td class="text-end">{{ p.stock_quantity }}</td><td class="text-end">{{ p.reorder_level }}</td>
       </tr>

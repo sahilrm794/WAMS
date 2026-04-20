@@ -28,16 +28,21 @@
       <tr>
         <td>
           {{ u.username }}
-          {% if u == request.user %}<span class="badge bg-info ms-1">You</span>{% endif %}
+          {% if u == request.user %}<span class="badge-status badge-pending ms-1">You</span>{% endif %}
         </td>
         <td>{{ u.get_full_name|default:"—" }}</td>
         <td>{{ u.email|default:"—" }}</td>
-        <td><span class="badge bg-secondary">{{ u.get_role_display }}</span></td>
+        <td>
+          {% if u.role == 'admin' %}<span class="badge-status badge-sent">{{ u.get_role_display }}</span>
+          {% elif u.role == 'dealer' %}<span class="badge-status badge-pending">{{ u.get_role_display }}</span>
+          {% else %}<span class="badge-status badge-received">{{ u.get_role_display }}</span>
+          {% endif %}
+        </td>
         <td>
           {% if u.is_active %}
-          <span class="badge bg-success-subtle text-success">Active</span>
+          <span class="badge-status badge-accepted">Active</span>
           {% else %}
-          <span class="badge bg-secondary">Inactive</span>
+          <span class="badge-status badge-draft">Inactive</span>
           {% endif %}
         </td>
         <td>
